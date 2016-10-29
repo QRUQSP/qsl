@@ -1,0 +1,69 @@
+#
+# Description
+# -----------
+#
+#
+# Fields
+# ------
+# id:                       The ID assigned to the item.
+# uuid:                     The Universal Unique ID.
+# station_id:               The station the item is attached to.
+#
+# time_of_traffic:          The UTC time when the traffic occurred, entered by logging user
+# frequency:                The radio frequency in MHz upon which traffic was heard. For example 10500.0000 is 10.5 GHz
+# mode:                     Mode of operation
+#                               0 - unknown
+#                               20 - LSB
+#                               30 - USB
+#                               40 - FM
+#                               10 - CW
+#                               50 - RTTY
+#                               60 - PSK
+#                               70 - JT
+#                               100 - AM
+# operator_id:              Operator ID within qru who logged this traffic
+# from_call_sign:           Call sign of the ham initiating the traffic if known
+# from_call_suffix:         Suffix or self-assigned indicator sometimes listed after a stroke (/) as part of the Call sign
+# to_call_sign:             Call sign of the ham receiving the traffic if known
+# to_call_suffix:           Suffix or self-assigned indicator sometimes listed after a stroke (/) as part of the Call sign
+# traffic:                  What did we hear on this frequency at this time? This can be almost any free-form text
+# from_r:                   Readability received from the ham initiating the traffic if exchanged or measured
+# from_s:                   Strength received from the ham initiating the traffic if exchanged or measured
+# from_t:                   Tone received from the ham initiating the traffic if exchanged or measured
+# to_r:                     Readability sent to the ham receiving the traffic if exchanged or measured
+# to_s:                     Strength sent to the ham receiving the traffic if exchanged or measured
+# to_t:                     Tone sent to the ham receiving the traffic if exchanged or measured
+# 
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last updated.
+#
+create table qruqsp_qsl_entries (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    station_id int not null,
+
+    time_of_traffic datetime not null,
+    frequency decimal(9,4) not null,
+    mode tinyint unsigned not null,
+    operator_id int not null,
+    from_call_sign varchar(20) not null,
+    from_call_suffix varchar(20) not null,
+    to_call_sign varchar(20) not null,
+    to_call_suffix varchar(20) not null,
+    traffic text not null,
+    from_r tinyint unsigned,
+    from_s tinyint unsigned,
+    from_t tinyint unsigned,
+    to_r tinyint unsigned,
+    to_s tinyint unsigned,
+    to_t tinyint unsigned,
+
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    index (from_call_sign, to_call_sign),
+    index (time_of_traffic, frequency, mode),
+    index (operator_id),
+    index sync (station_id, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';
