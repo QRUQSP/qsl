@@ -41,14 +41,11 @@ function qruqsp_qsl_entryUpdate(&$q) {
     //
     // Parse args
     //
-    if( !isset($args['utc_of_traffic']) && isset($args['date_of_traffic']) && isset($args['time_of_traffic']) ) {
-        $args['utc_of_traffic'] = $args['date_of_traffic'] . ' ' . $args['time_of_traffic'];
-    }
-    if( isset($args['from_call']) {
+    if( isset($args['from_call']) ) {
         if( $args['from_call'] != '' ) {
             $pieces = explode('/', $args['from_call']);
             $args['from_call_sign'] = $pieces[0];
-            if( isset($pieces[1]) {
+            if( isset($pieces[1]) ) {
                 $args['from_call_suffix'] = $pieces[1];
             }
         }
@@ -61,7 +58,7 @@ function qruqsp_qsl_entryUpdate(&$q) {
         if( $args['to_call'] != '' ) {
             $pieces = explode('/', $args['to_call']);
             $args['to_call_sign'] = $pieces[0];
-            if( isset($pieces[1]) {
+            if( isset($pieces[1]) ) {
                 $args['to_call_suffix'] = $pieces[1];
             }
         }
@@ -79,6 +76,33 @@ function qruqsp_qsl_entryUpdate(&$q) {
     $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entryUpdate');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
+    }
+
+    //
+    // Get the existing entry
+    //
+    $strsql = "SELECT id, "
+        . "DATE_FORMAT(utc_of_traffic, '%Y-%m-%d') AS date_of_traffic, "
+        . "DATE_FORMAT(utc_of_traffic, '%H:%i') AS time_of_traffic "
+        . "FROM qruqsp_qsl_entries "
+        . "WHERE station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
+        . "AND id = '" . qruqsp_core_dbQuote($q, $args['entry_id']) . "' "
+        . "";
+    $rc = qruqsp_core_dbHashQuery($q, $strsql, 'qruqsp.qsl', 'entry');
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    if( !isset($rc['entry']) ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.3', 'msg'=>'Entry not found'));
+    }
+    $entry = $rc['entry'];
+
+    //
+    // Check if parts of traffic UTC date or time were specified
+    //
+    if( !isset($args['utc_of_traffic']) && (isset($args['date_of_traffic']) || isset($args['time_of_traffic'])) ) {
+        $args['utc_of_traffic'] = (isset($args['date_of_traffic']) ? $args['date_of_traffic'] : $entry['date_of_traffic'])
+            . ' ' .  (isset($args['time_of_traffic']) ? $args['time_of_traffic'] : $entry['time_of_traffic']);
     }
 
     //

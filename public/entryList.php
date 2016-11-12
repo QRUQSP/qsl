@@ -33,13 +33,31 @@ function qruqsp_qsl_entryList($q) {
     }
 
     //
+    // Load station settings
+    //
+    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'intlSettings');
+    $rc = qruqsp_core_intlSettings($q, $args['station_id']);
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    $intl_timezone = $rc['settings']['intl-default-timezone'];
+    $intl_currency_fmt = numfmt_create($rc['settings']['intl-default-locale'], NumberFormatter::CURRENCY);
+    $intl_currency = $rc['settings']['intl-default-currency'];
+
+    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'datetimeFormat');
+    $datetime_format = qruqsp_core_datetimeFormat($q, 'php');
+
+    //
     // Get the list of entries
     //
     $strsql = "SELECT qruqsp_qsl_entries.id, "
-        . "qruqsp_qsl_entries.time_of_traffic, "
+        . "qruqsp_qsl_entries.utc_of_traffic, "
+        . "DATE_FORMAT(utc_of_traffic, '%Y-%m-%d') AS date_of_traffic, "
+        . "DATE_FORMAT(utc_of_traffic, '%H:%i') AS time_of_traffic, "
         . "qruqsp_qsl_entries.frequency, "
         . "qruqsp_qsl_entries.mode, "
         . "qruqsp_qsl_entries.operator_id, "
+        . "qruqsp_core_users.callsign AS operator_callsign, "
         . "qruqsp_qsl_entries.from_call_sign, "
         . "qruqsp_qsl_entries.from_call_suffix, "
         . "qruqsp_qsl_entries.to_call_sign, "
@@ -51,12 +69,19 @@ function qruqsp_qsl_entryList($q) {
         . "qruqsp_qsl_entries.to_s, "
         . "qruqsp_qsl_entries.to_t "
         . "FROM qruqsp_qsl_entries "
+        . "LEFT JOIN qruqsp_core_users ON ("
+            . "qruqsp_qsl_entries.operator_id = qruqsp_core_users.id "
+            . ") "
         . "WHERE qruqsp_qsl_entries.station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
+        . "ORDER BY qruqsp_qsl_entries.utc_of_traffic DESC "
         . "";
     qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'time_of_traffic', 'frequency', 'mode', 'operator_id', 'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t')),
+            'fields'=>array('id', 'utc_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'operator_id', 'operator_callsign',
+                'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),
+            'utctotz'=>array('utc_of_traffic'=>array('timezone'=>'UTC', 'format'=>$datetime_format)),
+            ),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -65,6 +90,14 @@ function qruqsp_qsl_entryList($q) {
         $entries = $rc['entries'];
         $entry_ids = array();
         foreach($entries as $iid => $entry) {
+            $entries[$iid]['from_call'] = $entry['from_call_sign'] . ($entry['from_call_suffix'] != '' ? '/' . $entry['from_call_suffix'] : '');
+            $entries[$iid]['to_call'] = $entry['to_call_sign'] . ($entry['to_call_suffix'] != '' ? '/' . $entry['to_call_suffix'] : '');
+            $entries[$iid]['from_rst'] = ($entry['from_r'] > 0 ? $entry['from_r'] : '?') 
+                . ($entry['from_s'] > 0 ? $entry['from_s'] : '?') 
+                . ($entry['from_t'] > 0 ? $entry['from_t'] : '');
+            $entries[$iid]['to_rst'] = ($entry['to_r'] > 0 ? $entry['to_r'] : '?') 
+                . ($entry['to_s'] > 0 ? $entry['to_s'] : '?') 
+                . ($entry['to_t'] > 0 ? $entry['to_t'] : '');
             $entry_ids[] = $entry['id'];
         }
     } else {

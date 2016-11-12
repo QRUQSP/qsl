@@ -58,8 +58,8 @@ function qruqsp_qsl_entryGet($q) {
     if( $args['entry_id'] == 0 ) {
         $dt = new DateTime('now', new DateTimeZone('UTC'));
         $entry = array('id'=>0,
-            'time_of_traffic_date'=>$dt->format($date_format),
-            'time_of_traffic_time'=>$dt->format($time_format),
+            'date_of_traffic'=>$dt->format($date_format),
+            'time_of_traffic'=>$dt->format($time_format),
             'frequency'=>'',
             'mode'=>'0',
             'operator_id'=>'0',
@@ -82,7 +82,9 @@ function qruqsp_qsl_entryGet($q) {
     //
     else {
         $strsql = "SELECT qruqsp_qsl_entries.id, "
-            . "qruqsp_qsl_entries.time_of_traffic, "
+            . "qruqsp_qsl_entries.utc_of_traffic, "
+            . "DATE_FORMAT(utc_of_traffic, '%Y-%m-%d') AS date_of_traffic, "
+            . "DATE_FORMAT(utc_of_traffic, '%H:%i') AS time_of_traffic, "
             . "qruqsp_qsl_entries.frequency, "
             . "qruqsp_qsl_entries.mode, "
             . "qruqsp_qsl_entries.operator_id, "
@@ -104,7 +106,8 @@ function qruqsp_qsl_entryGet($q) {
         qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
         $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
             array('container'=>'entries', 'fname'=>'id', 
-                'fields'=>array('time_of_traffic', 'frequency', 'mode', 'operator_id', 'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'traffic', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),
+                'fields'=>array('time_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'operator_id', 
+                    'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'traffic', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),
                 ),
             ));
         if( $rc['stat'] != 'ok' ) {
@@ -114,6 +117,18 @@ function qruqsp_qsl_entryGet($q) {
             return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.8', 'msg'=>'Unable to find Log Entry'));
         }
         $entry = $rc['entries'][0];
+
+        //
+        // Join the suffix's to the from and to
+        //
+        $entry['from_call'] = $entry['from_call_sign'];
+        if( $entry['from_call_suffix'] != '' ) {
+            $entry['from_call'] .= '/' . $entry['from_call_suffix'];
+        }
+        $entry['to_call'] = $entry['to_call_sign'];
+        if( $entry['to_call_suffix'] != '' ) {
+            $entry['to_call'] .= '/' . $entry['to_call_suffix'];
+        }
     }
 
     return array('stat'=>'ok', 'entry'=>$entry);

@@ -53,14 +53,14 @@ function qruqsp_qsl_entryAdd(&$q) {
     if( isset($args['from_call']) && $args['from_call'] != '' ) {
         $pieces = explode('/', $args['from_call']);
         $args['from_call_sign'] = $pieces[0];
-        if( isset($pieces[1]) {
+        if( isset($pieces[1]) ) {
             $args['from_call_suffix'] = $pieces[1];
         }
     }
     if( isset($args['to_call']) && $args['to_call'] != '' ) {
         $pieces = explode('/', $args['to_call']);
         $args['to_call_sign'] = $pieces[0];
-        if( isset($pieces[1]) {
+        if( isset($pieces[1]) ) {
             $args['to_call_suffix'] = $pieces[1];
         }
     }
