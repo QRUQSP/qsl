@@ -7,13 +7,10 @@
 // Arguments
 // ---------
 // q:
-// business_id:
+// station_id:
 // args: The arguments for the hook
 //
-// Returns
-// -------
-//
-function qruqsp_qsl_hooks_uiSettings(&$q, $business_id, $args) {
+function qruqsp_qsl_hooks_uiSettings(&$q, $station_id, $args) {
     //
     // Setup the default response
     //
@@ -22,10 +19,8 @@ function qruqsp_qsl_hooks_uiSettings(&$q, $business_id, $args) {
     //
     // Check permissions for what menu items should be available
     //
-    if( isset($q['business']['modules']['qruqsp.qsl'])
-        && (isset($args['permissions']['owners'])
-            || isset($args['permissions']['employees'])
-            || isset($args['permissions']['resellers'])
+    if( isset($q['station']['modules']['qruqsp.qsl'])
+        && (isset($args['permissions']['operators'])
             || ($q['session']['user']['perms']&0x01) == 0x01
             )
         ) {

@@ -22,7 +22,7 @@ function qruqsp_qsl_objects(&$q) {
         'sync'=>'yes',
         'table'=>'qruqsp_qsl_entries',
         'fields'=>array(
-            'time_of_traffic'=>array('name'=>'Time'),
+            'utc_of_traffic'=>array('name'=>'Time'),
             'frequency'=>array('name'=>'Frequency'),
             'mode'=>array('name'=>'Mode'),
             'operator_id'=>array('name'=>'Operator', 'ref'=>'qruqsp.core.users', 'default'=>'0'),

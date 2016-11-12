@@ -9,7 +9,7 @@
 # uuid:                     The Universal Unique ID.
 # station_id:               The station the item is attached to.
 #
-# time_of_traffic:          The UTC time when the traffic occurred, entered by logging user
+# utc_of_traffic:          The UTC time when the traffic occurred, entered by logging user
 # frequency:                The radio frequency in MHz upon which traffic was heard. For example 10500.0000 is 10.5 GHz
 # mode:                     Mode of operation
 #                               0 - unknown
@@ -42,7 +42,7 @@ create table qruqsp_qsl_entries (
     uuid char(36) not null,
     station_id int not null,
 
-    time_of_traffic datetime not null,
+    utc_of_traffic datetime not null,
     frequency decimal(9,4) not null,
     mode tinyint unsigned not null,
     operator_id int not null,
@@ -63,7 +63,7 @@ create table qruqsp_qsl_entries (
     primary key (id),
     unique index (uuid),
     index (from_call_sign, to_call_sign),
-    index (time_of_traffic, frequency, mode),
+    index (utc_of_traffic, frequency, mode),
     index (operator_id),
     index sync (station_id, uuid, last_updated)
 ) ENGINE='InnoDB', COMMENT='v1.01';

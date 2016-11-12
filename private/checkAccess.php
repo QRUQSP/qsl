@@ -15,13 +15,9 @@ function qruqsp_qsl_checkAccess(&$q, $station_id, $method) {
     // Check if the station is active and the module is enabled
     //
     qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'checkModuleAccess');
-    $rc = qruqsp_core_checkModuleAccess($q, $station_id, 'qruqsp', 'qsl');
+    $rc = qruqsp_core_checkModuleAccess($q, $station_id, array('package'=>'qruqsp', 'module'=>'qsl'));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
-    }
-
-    if( !isset($rc['ruleset']) ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.1', 'msg'=>'No permissions granted'));
     }
 
     //
@@ -45,7 +41,7 @@ function qruqsp_qsl_checkAccess(&$q, $station_id, $method) {
     qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQuery');
     $rc = qruqsp_core_dbHashQuery($q, $strsql, 'qruqsp.core', 'user');
     if( $rc['stat'] != 'ok' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.2', 'msg'=>'Access denied.'));
+        return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.1', 'msg'=>'Access denied.'));
     }
     //
     // If the user has permission, return ok
@@ -58,6 +54,6 @@ function qruqsp_qsl_checkAccess(&$q, $station_id, $method) {
     //
     // By default fail
     //
-    return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.3', 'msg'=>'Access denied'));
+    return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.2', 'msg'=>'Access denied'));
 }
 ?>
