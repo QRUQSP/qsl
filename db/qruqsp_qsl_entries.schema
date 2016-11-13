@@ -13,10 +13,10 @@
 # frequency:                The radio frequency in MHz upon which traffic was heard. For example 10500.0000 is 10.5 GHz
 # mode:                     Mode of operation
 #                               0 - unknown
+#                               10 - CW
 #                               20 - LSB
 #                               30 - USB
 #                               40 - FM
-#                               10 - CW
 #                               50 - RTTY
 #                               60 - PSK
 #                               70 - JT

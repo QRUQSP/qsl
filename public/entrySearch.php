@@ -37,6 +37,22 @@ function qruqsp_qsl_entrySearch($q) {
     }
 
     //
+    // Load the module maps
+    //
+    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'maps');
+    $rc = qruqsp_qsl_maps($q);
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    $maps = $rc['maps']; 
+
+    //
+    // Load the datetimeFormat
+    //
+    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'datetimeFormat');
+    $datetime_format = qruqsp_core_datetimeFormat($q, 'php');
+
+    //
     // Get the list of entries
     //
     $strsql = "SELECT qruqsp_qsl_entries.id, "
@@ -45,6 +61,7 @@ function qruqsp_qsl_entrySearch($q) {
         . "DATE_FORMAT(utc_of_traffic, '%H:%i') AS time_of_traffic, "
         . "qruqsp_qsl_entries.frequency, "
         . "qruqsp_qsl_entries.mode, "
+        . "qruqsp_qsl_entries.mode AS mode_text, "
         . "qruqsp_qsl_entries.operator_id, "
         . "qruqsp_qsl_entries.from_call_sign, "
         . "qruqsp_qsl_entries.from_call_suffix, "
@@ -74,8 +91,11 @@ function qruqsp_qsl_entrySearch($q) {
     qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'utc_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'operator_id', 
-                'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t')),
+            'fields'=>array('id', 'utc_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'mode_text', 'operator_id', 
+                'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),
+            'maps'=>array('mode_text'=>$maps['entry']['mode']),
+            'utctotz'=>array('utc_of_traffic'=>array('timezone'=>'UTC', 'format'=>$datetime_format)),
+            ),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;

@@ -64,6 +64,7 @@ function qruqsp_qsl_entryAdd(&$q) {
             $args['to_call_suffix'] = $pieces[1];
         }
     }
+    $args['operator_id'] = $q['session']['user']['id'];
 
     //
     // Check access to station_id as owner

@@ -9,16 +9,16 @@ function qruqsp_qsl_main() {
     this.menu.data = {};
     this.menu.nplist = [];
     this.menu.sections = {
-        'search':{'label':'', 'type':'livesearchgrid', 'livesearchcols':3,
-            'headerValues':['Time', 'From', 'To'],
-            'cellClasses':['multiline', 'multiline', 'multiline'],
+        'search':{'label':'', 'type':'livesearchgrid', 'livesearchcols':4,
+            'headerValues':['Time', 'Frequency', 'From', 'To'],
+            'cellClasses':['multiline', 'multiline', 'multiline', 'multiline'],
             'hint':'Search entry',
             'noData':'No entry found',
             },
-        'entries':{'label':'Log Entry', 'type':'simplegrid', 'num_cols':3,
+        'entries':{'label':'Log Entries', 'type':'simplegrid', 'num_cols':4,
             'noData':'No entry',
-            'headerValues':['UTC Time', 'From', 'To'],
-            'cellClasses':['multiline', 'multiline', 'multiline'],
+            'headerValues':['UTC Time', 'Frequency', 'From', 'To'],
+            'cellClasses':['multiline', 'multiline', 'multiline', 'multiline'],
             'addTxt':'Add Log Entry',
             'addFn':'Q.qruqsp_qsl_main.edit.open(\'Q.qruqsp_qsl_main.menu.open();\',0,null);'
             },
@@ -31,22 +31,23 @@ function qruqsp_qsl_main() {
         }
     }
     this.menu.liveSearchResultValue = function(s, f, i, j, d) {
-        this.cellValue(s, i, j, d);
+        return this.cellValue(s, i, j, d);
     }
     this.menu.liveSearchResultRowFn = function(s, f, i, j, d) {
-        this.rowFn(s, i, d);
+        return this.rowFn(s, i, d);
     }
     this.menu.cellValue = function(s, i, j, d) {
-        if( s == 'entries' ) {
+        if( s == 'entries' || s == 'search' ) {
             switch(j) {
                 case 0: return '<span class="maintext">' + d.time_of_traffic + '</span><span class="subtext">' + d.date_of_traffic + '</span>';
-                case 1: return '<span class="maintext">' + d.from_call + '</span><span class="subtext">' + d.from_rst + '</span>';
-                case 2: return '<span class="maintext">' + d.to_call + '</span><span class="subtext">' + d.to_rst + '</span>';
+                case 1: return '<span class="maintext">' + d.frequency + '</span><span class="subtext">' + d.mode_text + '</span>';
+                case 2: return '<span class="maintext">' + d.from_call + '</span><span class="subtext">' + d.from_rst + '</span>';
+                case 3: return '<span class="maintext">' + d.to_call + '</span><span class="subtext">' + d.to_rst + '</span>';
             }
         }
     }
     this.menu.rowFn = function(s, i, d) {
-        if( s == 'entries' ) {
+        if( s == 'entries' || s == 'search' ) {
             return 'Q.qruqsp_qsl_main.edit.open(\'Q.qruqsp_qsl_main.menu.open();\',\'' + d.id + '\',Q.qruqsp_qsl_main.entry.nplist);';
         }
     }
