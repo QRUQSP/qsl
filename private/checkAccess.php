@@ -34,7 +34,6 @@ function qruqsp_qsl_checkAccess(&$q, $station_id, $method) {
         . "FROM qruqsp_core_station_users "
         . "WHERE station_id = '" . qruqsp_core_dbQuote($q, $station_id) . "' "
         . "AND user_id = '" . qruqsp_core_dbQuote($q, $q['session']['user']['id']) . "' "
-        . "AND package = 'qruqsp' "
         . "AND status = 10 "
         . "AND permission_group = 'operators' "
         . "";

@@ -20,7 +20,7 @@ function qruqsp_qsl_hooks_uiSettings(&$q, $station_id, $args) {
     // Check permissions for what menu items should be available
     //
     if( isset($q['station']['modules']['qruqsp.qsl'])
-        && (isset($args['permissions']['operators'])
+        && (isset($q['station']['permissions']['operators'])
             || ($q['session']['user']['perms']&0x01) == 0x01
             )
         ) {
