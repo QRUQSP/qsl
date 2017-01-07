@@ -97,7 +97,7 @@ function qruqsp_qsl_main() {
     this.edit = new Q.panel('Log Entry', 'qruqsp_qsl_main', 'edit', 'mc', 'medium mediumaside', 'sectioned', 'qruqsp.qsl.main.edit');
     this.edit.data = null;
     this.edit.entry_id = 0;
-    this.nplist = [];
+    this.edit.nplist = [];
     this.edit.sections = {
         'general':{'label':'', 'aside':'yes','fields':{
             'date_of_traffic':{'label':'UTC Date', 'type':'date'},
@@ -193,7 +193,7 @@ function qruqsp_qsl_main() {
     }
     this.edit.prevButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.entry_id) > 0 ) {
-            return 'Q.qruqsp_qsl_main.edit.save(\'Q.qruqsp_qsl_main.entry_id.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) - 1] + ');\');';
+            return 'Q.qruqsp_qsl_main.edit.save(\'Q.qruqsp_qsl_main.edit.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) - 1] + ');\');';
         }
         return null;
     }
