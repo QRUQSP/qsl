@@ -10,7 +10,7 @@
 // Returns
 // -------
 //
-function qruqsp_qsl_objects(&$q) {
+function qruqsp_qsl_objects(&$ciniki) {
     //
     // Build the objects
     //

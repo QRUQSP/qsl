@@ -2,23 +2,23 @@
 //
 // Description
 // -----------
-// This method searchs for a Log Entrys for a station.
+// This method searchs for a Log Entrys for a tenant.
 //
 // Arguments
 // ---------
 // api_key:
 // auth_token:
-// station_id:         The ID of the station to get Log Entry for.
+// tnid:               The ID of the tenant to get Log Entry for.
 // start_needle:       The search string to search for.
 // limit:              The maximum number of entries to return.
 //
-function qruqsp_qsl_entrySearch($q) {
+function qruqsp_qsl_entrySearch($ciniki) {
     //
     // Find all the required and optional arguments
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'prepareArgs');
-    $rc = qruqsp_core_prepareArgs($q, 'no', array(
-        'station_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Station'),
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
+    $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
+        'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'start_needle'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Search String'),
         'limit'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Limit'),
         ));
@@ -28,10 +28,10 @@ function qruqsp_qsl_entrySearch($q) {
     $args = $rc['args'];
 
     //
-    // Check access to station_id as owner, or sys admin.
+    // Check access to tnid as owner, or sys admin.
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'checkAccess');
-    $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entrySearch');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'checkAccess');
+    $rc = qruqsp_qsl_checkAccess($ciniki, $args['tnid'], 'qruqsp.qsl.entrySearch');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -39,8 +39,8 @@ function qruqsp_qsl_entrySearch($q) {
     //
     // Load the module maps
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'maps');
-    $rc = qruqsp_qsl_maps($q);
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'maps');
+    $rc = qruqsp_qsl_maps($ciniki);
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -49,8 +49,8 @@ function qruqsp_qsl_entrySearch($q) {
     //
     // Load the datetimeFormat
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'datetimeFormat');
-    $datetime_format = qruqsp_core_datetimeFormat($q, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'datetimeFormat');
+    $datetime_format = ciniki_users_datetimeFormat($ciniki, 'php');
 
     //
     // Get the list of entries
@@ -74,22 +74,22 @@ function qruqsp_qsl_entrySearch($q) {
         . "qruqsp_qsl_entries.to_s, "
         . "qruqsp_qsl_entries.to_t "
         . "FROM qruqsp_qsl_entries "
-        . "LEFT JOIN qruqsp_core_users ON ("
-            . "qruqsp_qsl_entries.operator_id = qruqsp_core_users.id "
+        . "LEFT JOIN ciniki_users ON ("
+            . "qruqsp_qsl_entries.operator_id = ciniki_users.id "
             . ") "
-        . "WHERE qruqsp_qsl_entries.station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
+        . "WHERE qruqsp_qsl_entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND ("
-            . "from_call_sign LIKE '" . qruqsp_core_dbQuote($q, $args['start_needle']) . "%' "
-            . "OR to_call_sign LIKE '" . qruqsp_core_dbQuote($q, $args['start_needle']) . "%' "
+            . "from_call_sign LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR to_call_sign LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
         . ") "
         . "";
     if( isset($args['limit']) && is_numeric($args['limit']) && $args['limit'] > 0 ) {
-        $strsql .= "LIMIT " . qruqsp_core_dbQuote($q, $args['limit']) . " ";
+        $strsql .= "LIMIT " . ciniki_core_dbQuote($ciniki, $args['limit']) . " ";
     } else {
         $strsql .= "LIMIT 25 ";
     }
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
-    $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+    $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.qsl', array(
         array('container'=>'entries', 'fname'=>'id', 
             'fields'=>array('id', 'utc_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'mode_text', 'operator_id', 
                 'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),

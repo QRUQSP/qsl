@@ -8,16 +8,16 @@
 // ---------
 // api_key:
 // auth_token:
-// station_id:            The ID of the station the log entry is attached to.
+// tnid:                  The ID of the tenant the log entry is attached to.
 // entry_id:            The ID of the log entry to be removed.
 //
-function qruqsp_qsl_entryDelete(&$q) {
+function qruqsp_qsl_entryDelete(&$ciniki) {
     //
     // Find all the required and optional arguments
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'prepareArgs');
-    $rc = qruqsp_core_prepareArgs($q, 'no', array(
-        'station_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Station'),
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
+    $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
+        'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'entry_id'=>array('required'=>'yes', 'blank'=>'yes', 'name'=>'Log Entry'),
         ));
     if( $rc['stat'] != 'ok' ) {
@@ -26,10 +26,10 @@ function qruqsp_qsl_entryDelete(&$q) {
     $args = $rc['args'];
 
     //
-    // Check access to station_id as owner
+    // Check access to tnid as owner
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'checkAccess');
-    $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entryDelete');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'checkAccess');
+    $rc = qruqsp_qsl_checkAccess($ciniki, $args['tnid'], 'qruqsp.qsl.entryDelete');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -39,10 +39,10 @@ function qruqsp_qsl_entryDelete(&$q) {
     //
     $strsql = "SELECT id, uuid "
         . "FROM qruqsp_qsl_entries "
-        . "WHERE station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
-        . "AND id = '" . qruqsp_core_dbQuote($q, $args['entry_id']) . "' "
+        . "WHERE tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "AND id = '" . ciniki_core_dbQuote($ciniki, $args['entry_id']) . "' "
         . "";
-    $rc = qruqsp_core_dbHashQuery($q, $strsql, 'qruqsp.qsl', 'entry');
+    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'qruqsp.qsl', 'entry');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -58,8 +58,8 @@ function qruqsp_qsl_entryDelete(&$q) {
     //
     // Check if any modules are currently using this object
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'objectCheckUsed');
-    $rc = qruqsp_core_objectCheckUsed($q, $args['station_id'], 'qruqsp.qsl.entry', $args['entry_id']);
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectCheckUsed');
+    $rc = ciniki_core_objectCheckUsed($ciniki, $args['tnid'], 'qruqsp.qsl.entry', $args['entry_id']);
     if( $rc['stat'] != 'ok' ) {
         return array('stat'=>'fail', 'err'=>array('code'=>'qruqsp.qsl.5', 'msg'=>'Unable to check if the log entry is still being used.', 'err'=>$rc['err']));
     }
@@ -70,13 +70,13 @@ function qruqsp_qsl_entryDelete(&$q) {
     //
     // Start transaction
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionStart');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionRollback');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionCommit');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbDelete');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'objectDelete');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbAddModuleHistory');
-    $rc = qruqsp_core_dbTransactionStart($q, 'qruqsp.qsl');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionStart');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionRollback');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionCommit');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbDelete');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectDelete');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbAddModuleHistory');
+    $rc = ciniki_core_dbTransactionStart($ciniki, 'qruqsp.qsl');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -84,27 +84,27 @@ function qruqsp_qsl_entryDelete(&$q) {
     //
     // Remove the entry
     //
-    $rc = qruqsp_core_objectDelete($q, $args['station_id'], 'qruqsp.qsl.entry',
+    $rc = ciniki_core_objectDelete($ciniki, $args['tnid'], 'qruqsp.qsl.entry',
         $args['entry_id'], $entry['uuid'], 0x04);
     if( $rc['stat'] != 'ok' ) {
-        qruqsp_core_dbTransactionRollback($q, 'qruqsp.qsl');
+        ciniki_core_dbTransactionRollback($ciniki, 'qruqsp.qsl');
         return $rc;
     }
 
     //
     // Commit the transaction
     //
-    $rc = qruqsp_core_dbTransactionCommit($q, 'qruqsp.qsl');
+    $rc = ciniki_core_dbTransactionCommit($ciniki, 'qruqsp.qsl');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
 
     //
-    // Update the last_change date in the station modules
+    // Update the last_change date in the tenant modules
     // Ignore the result, as we don't want to stop user updates if this fails.
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'updateModuleChangeDate');
-    qruqsp_core_updateModuleChangeDate($q, $args['station_id'], 'qruqsp', 'qsl');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'private', 'updateModuleChangeDate');
+    ciniki_tenants_updateModuleChangeDate($ciniki, $args['tnid'], 'qruqsp', 'qsl');
 
     return array('stat'=>'ok');
 }

@@ -2,21 +2,21 @@
 //
 // Description
 // -----------
-// This method will add a new log entry for the station.
+// This method will add a new log entry for the tenant.
 //
 // Arguments
 // ---------
 // api_key:
 // auth_token:
-// station_id:        The ID of the station to add the Log Entry to.
+// tnid:              The ID of the tenant to add the Log Entry to.
 //
-function qruqsp_qsl_entryAdd(&$q) {
+function qruqsp_qsl_entryAdd(&$ciniki) {
     //
     // Find all the required and optional arguments
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'prepareArgs');
-    $rc = qruqsp_core_prepareArgs($q, 'no', array(
-        'station_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Station'),
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
+    $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
+        'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'utc_of_traffic'=>array('required'=>'no', 'blank'=>'no', 'type'=>'datetime', 'name'=>'UTC Time'),
         'date_of_traffic'=>array('required'=>'no', 'blank'=>'no', 'type'=>'date', 'name'=>'Date'),
         'time_of_traffic'=>array('required'=>'no', 'blank'=>'no', 'type'=>'time', 'name'=>'Time'),
@@ -64,13 +64,13 @@ function qruqsp_qsl_entryAdd(&$q) {
             $args['to_call_suffix'] = $pieces[1];
         }
     }
-    $args['operator_id'] = $q['session']['user']['id'];
+    $args['operator_id'] = $ciniki['session']['user']['id'];
 
     //
-    // Check access to station_id as owner
+    // Check access to tnid as owner
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'checkAccess');
-    $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entryAdd');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'checkAccess');
+    $rc = qruqsp_qsl_checkAccess($ciniki, $args['tnid'], 'qruqsp.qsl.entryAdd');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -78,11 +78,11 @@ function qruqsp_qsl_entryAdd(&$q) {
     //
     // Start transaction
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionStart');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionRollback');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbTransactionCommit');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbAddModuleHistory');
-    $rc = qruqsp_core_dbTransactionStart($q, 'qruqsp.qsl');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionStart');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionRollback');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbTransactionCommit');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbAddModuleHistory');
+    $rc = ciniki_core_dbTransactionStart($ciniki, 'qruqsp.qsl');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -90,10 +90,10 @@ function qruqsp_qsl_entryAdd(&$q) {
     //
     // Add the log entry to the database
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'objectAdd');
-    $rc = qruqsp_core_objectAdd($q, $args['station_id'], 'qruqsp.qsl.entry', $args, 0x04);
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'objectAdd');
+    $rc = ciniki_core_objectAdd($ciniki, $args['tnid'], 'qruqsp.qsl.entry', $args, 0x04);
     if( $rc['stat'] != 'ok' ) {
-        qruqsp_core_dbTransactionRollback($q, 'qruqsp.qsl');
+        ciniki_core_dbTransactionRollback($ciniki, 'qruqsp.qsl');
         return $rc;
     }
     $entry_id = $rc['id'];
@@ -101,23 +101,23 @@ function qruqsp_qsl_entryAdd(&$q) {
     //
     // Commit the transaction
     //
-    $rc = qruqsp_core_dbTransactionCommit($q, 'qruqsp.qsl');
+    $rc = ciniki_core_dbTransactionCommit($ciniki, 'qruqsp.qsl');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
 
     //
-    // Update the last_change date in the station modules
+    // Update the last_change date in the tenant modules
     // Ignore the result, as we don't want to stop user updates if this fails.
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'updateModuleChangeDate');
-    qruqsp_core_updateModuleChangeDate($q, $args['station_id'], 'qruqsp', 'qsl');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'private', 'updateModuleChangeDate');
+    ciniki_tenants_updateModuleChangeDate($ciniki, $args['tnid'], 'qruqsp', 'qsl');
 
     //
     // Update the web index if enabled
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'hookExec');
-    qruqsp_core_hookExec($q, $args['station_id'], 'qruqsp', 'web', 'indexObject', array('object'=>'qruqsp.qsl.entry', 'object_id'=>$entry_id));
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'hookExec');
+    ciniki_core_hookExec($ciniki, $args['tnid'], 'qruqsp', 'web', 'indexObject', array('object'=>'qruqsp.qsl.entry', 'object_id'=>$entry_id));
 
     return array('stat'=>'ok', 'id'=>$entry_id);
 }

@@ -10,7 +10,7 @@
 // Returns
 // -------
 //
-function qruqsp_qsl_flags(&$q) {
+function qruqsp_qsl_flags(&$ciniki) {
     //
     // The flags for the object
     //

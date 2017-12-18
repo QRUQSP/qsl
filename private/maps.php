@@ -10,7 +10,7 @@
 // Returns
 // -------
 //
-function qruqsp_qsl_maps(&$q) {
+function qruqsp_qsl_maps(&$ciniki) {
     //
     // Build the maps object
     //

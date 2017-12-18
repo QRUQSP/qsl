@@ -5,7 +5,7 @@ function qruqsp_qsl_main() {
     //
     // The panel to list the entry
     //
-    this.menu = new Q.panel('entry', 'qruqsp_qsl_main', 'menu', 'mc', 'medium', 'sectioned', 'qruqsp.qsl.main.menu');
+    this.menu = new M.panel('entry', 'qruqsp_qsl_main', 'menu', 'mc', 'medium', 'sectioned', 'qruqsp.qsl.main.menu');
     this.menu.data = {};
     this.menu.nplist = [];
     this.menu.sections = {
@@ -20,13 +20,13 @@ function qruqsp_qsl_main() {
             'headerValues':['UTC Time', 'Frequency', 'From', 'To'],
             'cellClasses':['multiline', 'multiline', 'multiline', 'multiline'],
             'addTxt':'Add Log Entry',
-            'addFn':'Q.qruqsp_qsl_main.edit.open(\'Q.qruqsp_qsl_main.menu.open();\',0,null);'
+            'addFn':'M.qruqsp_qsl_main.edit.open(\'M.qruqsp_qsl_main.menu.open();\',0,null);'
             },
     }
     this.menu.liveSearchCb = function(s, i, v) {
         if( s == 'search' && v != '' ) {
-            Q.api.getJSONBgCb('qruqsp.qsl.entrySearch', {'station_id':Q.curStationID, 'start_needle':v, 'limit':'25'}, function(rsp) {
-                Q.qruqsp_qsl_main.menu.liveSearchShow('search',null,Q.gE(Q.qruqsp_qsl_main.menu.panelUID + '_' + s), rsp.entries);
+            M.api.getJSONBgCb('qruqsp.qsl.entrySearch', {'tnid':M.curTenantID, 'start_needle':v, 'limit':'25'}, function(rsp) {
+                M.qruqsp_qsl_main.menu.liveSearchShow('search',null,M.gE(M.qruqsp_qsl_main.menu.panelUID + '_' + s), rsp.entries);
                 });
         }
     }
@@ -48,16 +48,16 @@ function qruqsp_qsl_main() {
     }
     this.menu.rowFn = function(s, i, d) {
         if( s == 'entries' || s == 'search' ) {
-            return 'Q.qruqsp_qsl_main.edit.open(\'Q.qruqsp_qsl_main.menu.open();\',\'' + d.id + '\',Q.qruqsp_qsl_main.entry.nplist);';
+            return 'M.qruqsp_qsl_main.edit.open(\'M.qruqsp_qsl_main.menu.open();\',\'' + d.id + '\',M.qruqsp_qsl_main.entry.nplist);';
         }
     }
     this.menu.open = function(cb) {
-        Q.api.getJSONCb('qruqsp.qsl.entryList', {'station_id':Q.curStationID}, function(rsp) {
+        M.api.getJSONCb('qruqsp.qsl.entryList', {'tnid':M.curTenantID}, function(rsp) {
             if( rsp.stat != 'ok' ) {
-                Q.api.err(rsp);
+                M.api.err(rsp);
                 return false;
             }
-            var p = Q.qruqsp_qsl_main.menu;
+            var p = M.qruqsp_qsl_main.menu;
             p.data = rsp;
             p.nplist = (rsp.nplist != null ? rsp.nplist : null);
             p.refresh();
@@ -69,7 +69,7 @@ function qruqsp_qsl_main() {
     //
     // The panel to display Log Entry
     //
-    this.entry = new Q.panel('Log Entry', 'qruqsp_qsl_main', 'entry', 'mc', 'medium mediumaside', 'sectioned', 'qruqsp.qsl.main.entry');
+    this.entry = new M.panel('Log Entry', 'qruqsp_qsl_main', 'entry', 'mc', 'medium mediumaside', 'sectioned', 'qruqsp.qsl.main.entry');
     this.entry.data = null;
     this.entry.entry_id = 0;
     this.entry.sections = {
@@ -77,24 +77,24 @@ function qruqsp_qsl_main() {
     this.entry.open = function(cb, eid, list) {
         if( eid != null ) { this.entry_id = eid; }
         if( list != null ) { this.nplist = list; }
-        Q.api.getJSONCb('qruqsp.qsl.entryGet', {'station_id':Q.curStationID, 'entry_id':this.entry_id}, function(rsp) {
+        M.api.getJSONCb('qruqsp.qsl.entryGet', {'tnid':M.curTenantID, 'entry_id':this.entry_id}, function(rsp) {
             if( rsp.stat != 'ok' ) {
-                Q.api.err(rsp);
+                M.api.err(rsp);
                 return false;
             }
-            var p = Q.qruqsp_qsl_main.entry;
+            var p = M.qruqsp_qsl_main.entry;
             p.data = rsp.entry;
             p.refresh();
             p.show(cb);
         });
     }
-    this.entry.addButton('edit', 'Edit', 'Q.qruqsp_qsl_main.edit.open(\'Q.qruqsp_qsl_main.entry.open();\',Q.qruqsp_qsl_main.entry.entry_id);');
+    this.entry.addButton('edit', 'Edit', 'M.qruqsp_qsl_main.edit.open(\'M.qruqsp_qsl_main.entry.open();\',M.qruqsp_qsl_main.entry.entry_id);');
     this.entry.addClose('Back');
 
     //
     // The panel to edit Log Entry
     //
-    this.edit = new Q.panel('Log Entry', 'qruqsp_qsl_main', 'edit', 'mc', 'medium mediumaside', 'sectioned', 'qruqsp.qsl.main.edit');
+    this.edit = new M.panel('Log Entry', 'qruqsp_qsl_main', 'edit', 'mc', 'medium mediumaside', 'sectioned', 'qruqsp.qsl.main.edit');
     this.edit.data = null;
     this.edit.entry_id = 0;
     this.edit.nplist = [];
@@ -121,39 +121,39 @@ function qruqsp_qsl_main() {
             'traffic':{'label':'', 'hidelabel':'yes', 'type':'textarea', 'size':'large'},
             }},
         '_buttons':{'label':'', 'buttons':{
-            'save':{'label':'Save', 'fn':'Q.qruqsp_qsl_main.edit.save();'},
+            'save':{'label':'Save', 'fn':'M.qruqsp_qsl_main.edit.save();'},
             'delete':{'label':'Delete', 
-                'visible':function() {return Q.qruqsp_qsl_main.edit.entry_id > 0 ? 'yes' : 'no'; },
-                'fn':'Q.qruqsp_qsl_main.edit.remove();'},
+                'visible':function() {return M.qruqsp_qsl_main.edit.entry_id > 0 ? 'yes' : 'no'; },
+                'fn':'M.qruqsp_qsl_main.edit.remove();'},
             }},
         };
     this.edit.fieldValue = function(s, i, d) { return this.data[i]; }
     this.edit.fieldHistoryArgs = function(s, i) {
-        return {'method':'qruqsp.qsl.entryHistory', 'args':{'station_id':Q.curStationID, 'entry_id':this.entry_id, 'field':i}};
+        return {'method':'qruqsp.qsl.entryHistory', 'args':{'tnid':M.curTenantID, 'entry_id':this.entry_id, 'field':i}};
     }
     this.edit.open = function(cb, eid, list) {
         if( eid != null ) { this.entry_id = eid; }
         if( list != null ) { this.nplist = list; }
-        Q.api.getJSONCb('qruqsp.qsl.entryGet', {'station_id':Q.curStationID, 'entry_id':this.entry_id}, function(rsp) {
+        M.api.getJSONCb('qruqsp.qsl.entryGet', {'tnid':M.curTenantID, 'entry_id':this.entry_id}, function(rsp) {
             if( rsp.stat != 'ok' ) {
-                Q.api.err(rsp);
+                M.api.err(rsp);
                 return false;
             }
-            var p = Q.qruqsp_qsl_main.edit;
+            var p = M.qruqsp_qsl_main.edit;
             p.data = rsp.entry;
             p.refresh();
             p.show(cb);
         });
     }
     this.edit.save = function(cb) {
-        if( cb == null ) { cb = 'Q.qruqsp_qsl_main.edit.close();'; }
+        if( cb == null ) { cb = 'M.qruqsp_qsl_main.edit.close();'; }
         if( !this.checkForm() ) { return false; }
         if( this.entry_id > 0 ) {
             var c = this.serializeForm('no');
             if( c != '' ) {
-                Q.api.postJSONCb('qruqsp.qsl.entryUpdate', {'station_id':Q.curStationID, 'entry_id':this.entry_id}, c, function(rsp) {
+                M.api.postJSONCb('qruqsp.qsl.entryUpdate', {'tnid':M.curTenantID, 'entry_id':this.entry_id}, c, function(rsp) {
                     if( rsp.stat != 'ok' ) {
-                        Q.api.err(rsp);
+                        M.api.err(rsp);
                         return false;
                     }
                     eval(cb);
@@ -164,40 +164,40 @@ function qruqsp_qsl_main() {
         } else {
             var c = this.serializeForm('yes');
             console.log(c);
-            Q.api.postJSONCb('qruqsp.qsl.entryAdd', {'station_id':Q.curStationID}, c, function(rsp) {
+            M.api.postJSONCb('qruqsp.qsl.entryAdd', {'tnid':M.curTenantID}, c, function(rsp) {
                 if( rsp.stat != 'ok' ) {
-                    Q.api.err(rsp);
+                    M.api.err(rsp);
                     return false;
                 }
-                Q.qruqsp_qsl_main.edit.entry_id = rsp.id;
+                M.qruqsp_qsl_main.edit.entry_id = rsp.id;
                 eval(cb);
             });
         }
     }
     this.edit.remove = function() {
         if( confirm('Are you sure you want to remove entry?') ) {
-            Q.api.getJSONCb('qruqsp.qsl.entryDelete', {'station_id':Q.curStationID, 'entry_id':this.entry_id}, function(rsp) {
+            M.api.getJSONCb('qruqsp.qsl.entryDelete', {'tnid':M.curTenantID, 'entry_id':this.entry_id}, function(rsp) {
                 if( rsp.stat != 'ok' ) {
-                    Q.api.err(rsp);
+                    M.api.err(rsp);
                     return false;
                 }
-                Q.qruqsp_qsl_main.edit.close();
+                M.qruqsp_qsl_main.edit.close();
             });
         }
     }
     this.edit.nextButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.entry_id) < (this.nplist.length - 1) ) {
-            return 'Q.qruqsp_qsl_main.edit.save(\'Q.qruqsp_qsl_main.edit.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) + 1] + ');\');';
+            return 'M.qruqsp_qsl_main.edit.save(\'M.qruqsp_qsl_main.edit.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) + 1] + ');\');';
         }
         return null;
     }
     this.edit.prevButtonFn = function() {
         if( this.nplist != null && this.nplist.indexOf('' + this.entry_id) > 0 ) {
-            return 'Q.qruqsp_qsl_main.edit.save(\'Q.qruqsp_qsl_main.edit.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) - 1] + ');\');';
+            return 'M.qruqsp_qsl_main.edit.save(\'M.qruqsp_qsl_main.edit.open(null,' + this.nplist[this.nplist.indexOf('' + this.entry_id) - 1] + ');\');';
         }
         return null;
     }
-    this.edit.addButton('save', 'Save', 'Q.qruqsp_qsl_main.edit.save();');
+    this.edit.addButton('save', 'Save', 'M.qruqsp_qsl_main.edit.save();');
     this.edit.addClose('Cancel');
     this.edit.addButton('next', 'Next');
     this.edit.addLeftButton('prev', 'Prev');
@@ -217,7 +217,7 @@ function qruqsp_qsl_main() {
         //
         // Create the app container
         //
-        var ac = Q.createContainer(ap, 'qruqsp_qsl_main', 'yes');
+        var ac = M.createContainer(ap, 'qruqsp_qsl_main', 'yes');
         if( ac == null ) {
             alert('App Error');
             return false;

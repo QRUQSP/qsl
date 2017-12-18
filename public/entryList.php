@@ -2,21 +2,21 @@
 //
 // Description
 // -----------
-// This method will return the list of Log Entrys for a station.
+// This method will return the list of Log Entrys for a tenant.
 //
 // Arguments
 // ---------
 // api_key:
 // auth_token:
-// station_id:        The ID of the station to get Log Entry for.
+// tnid:              The ID of the tenant to get Log Entry for.
 //
-function qruqsp_qsl_entryList($q) {
+function qruqsp_qsl_entryList($ciniki) {
     //
     // Find all the required and optional arguments
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'prepareArgs');
-    $rc = qruqsp_core_prepareArgs($q, 'no', array(
-        'station_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Station'),
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
+    $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
+        'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -24,10 +24,10 @@ function qruqsp_qsl_entryList($q) {
     $args = $rc['args'];
 
     //
-    // Check access to station_id as owner, or sys admin.
+    // Check access to tnid as owner, or sys admin.
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'checkAccess');
-    $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entryList');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'checkAccess');
+    $rc = qruqsp_qsl_checkAccess($ciniki, $args['tnid'], 'qruqsp.qsl.entryList');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -35,8 +35,8 @@ function qruqsp_qsl_entryList($q) {
     //
     // Load the module maps
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'maps');
-    $rc = qruqsp_qsl_maps($q);
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'maps');
+    $rc = qruqsp_qsl_maps($ciniki);
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -45,8 +45,8 @@ function qruqsp_qsl_entryList($q) {
     //
     // Load the datetimeFormat
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'datetimeFormat');
-    $datetime_format = qruqsp_core_datetimeFormat($q, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'datetimeFormat');
+    $datetime_format = ciniki_users_datetimeFormat($ciniki, 'php');
 
     //
     // Get the list of entries
@@ -59,7 +59,7 @@ function qruqsp_qsl_entryList($q) {
         . "qruqsp_qsl_entries.mode, "
         . "qruqsp_qsl_entries.mode AS mode_text, "
         . "qruqsp_qsl_entries.operator_id, "
-        . "qruqsp_core_users.callsign AS operator_callsign, "
+        . "ciniki_users.username AS operator_callsign, "    // FIXME: ADD qruqsp_core_users tables to store callsign
         . "qruqsp_qsl_entries.from_call_sign, "
         . "qruqsp_qsl_entries.from_call_suffix, "
         . "qruqsp_qsl_entries.to_call_sign, "
@@ -71,14 +71,14 @@ function qruqsp_qsl_entryList($q) {
         . "qruqsp_qsl_entries.to_s, "
         . "qruqsp_qsl_entries.to_t "
         . "FROM qruqsp_qsl_entries "
-        . "LEFT JOIN qruqsp_core_users ON ("
-            . "qruqsp_qsl_entries.operator_id = qruqsp_core_users.id "
+        . "LEFT JOIN ciniki_users ON ("
+            . "qruqsp_qsl_entries.operator_id = ciniki_users.id "
             . ") "
-        . "WHERE qruqsp_qsl_entries.station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
+        . "WHERE qruqsp_qsl_entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "ORDER BY qruqsp_qsl_entries.utc_of_traffic DESC "
         . "";
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
-    $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+    $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.qsl', array(
         array('container'=>'entries', 'fname'=>'id', 
             'fields'=>array('id', 'utc_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'mode_text', 'operator_id', 'operator_callsign',
                 'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),

@@ -8,16 +8,16 @@
 // ---------
 // api_key:
 // auth_token:
-// station_id:         The ID of the station the log entry is attached to.
+// tnid:               The ID of the tenant the log entry is attached to.
 // entry_id:          The ID of the log entry to get the details for.
 //
-function qruqsp_qsl_entryGet($q) {
+function qruqsp_qsl_entryGet($ciniki) {
     //
     // Find all the required and optional arguments
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'prepareArgs');
-    $rc = qruqsp_core_prepareArgs($q, 'no', array(
-        'station_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Station'),
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
+    $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
+        'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'entry_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Log Entry'),
         ));
     if( $rc['stat'] != 'ok' ) {
@@ -27,19 +27,19 @@ function qruqsp_qsl_entryGet($q) {
 
     //
     // Make sure this module is activated, and
-    // check permission to run this function for this station
+    // check permission to run this function for this tenant
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'qsl', 'private', 'checkAccess');
-    $rc = qruqsp_qsl_checkAccess($q, $args['station_id'], 'qruqsp.qsl.entryGet');
+    ciniki_core_loadMethod($ciniki, 'qruqsp', 'qsl', 'private', 'checkAccess');
+    $rc = qruqsp_qsl_checkAccess($ciniki, $args['tnid'], 'qruqsp.qsl.entryGet');
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
 
     //
-    // Load station settings
+    // Load tenant settings
     //
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'intlSettings');
-    $rc = qruqsp_core_intlSettings($q, $args['station_id']);
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'private', 'intlSettings');
+    $rc = ciniki_tenants_intlSettings($ciniki, $args['tnid']);
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
@@ -47,10 +47,10 @@ function qruqsp_qsl_entryGet($q) {
     $intl_currency_fmt = numfmt_create($rc['settings']['intl-default-locale'], NumberFormatter::CURRENCY);
     $intl_currency = $rc['settings']['intl-default-currency'];
 
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dateFormat');
-    qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'timeFormat');
-    $date_format = qruqsp_core_dateFormat($q, 'php');
-    $time_format = qruqsp_core_timeFormat($q, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'dateFormat');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'timeFormat');
+    $date_format = ciniki_users_dateFormat($ciniki, 'php');
+    $time_format = ciniki_users_timeFormat($ciniki, 'php');
 
     //
     // Return default for new Log Entry
@@ -100,11 +100,11 @@ function qruqsp_qsl_entryGet($q) {
             . "qruqsp_qsl_entries.to_s, "
             . "qruqsp_qsl_entries.to_t "
             . "FROM qruqsp_qsl_entries "
-            . "WHERE qruqsp_qsl_entries.station_id = '" . qruqsp_core_dbQuote($q, $args['station_id']) . "' "
-            . "AND qruqsp_qsl_entries.id = '" . qruqsp_core_dbQuote($q, $args['entry_id']) . "' "
+            . "WHERE qruqsp_qsl_entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . "AND qruqsp_qsl_entries.id = '" . ciniki_core_dbQuote($ciniki, $args['entry_id']) . "' "
             . "";
-        qruqsp_core_loadMethod($q, 'qruqsp', 'core', 'private', 'dbHashQueryArrayTree');
-        $rc = qruqsp_core_dbHashQueryArrayTree($q, $strsql, 'qruqsp.qsl', array(
+        ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+        $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'qruqsp.qsl', array(
             array('container'=>'entries', 'fname'=>'id', 
                 'fields'=>array('time_of_traffic', 'date_of_traffic', 'time_of_traffic', 'frequency', 'mode', 'operator_id', 
                     'from_call_sign', 'from_call_suffix', 'to_call_sign', 'to_call_suffix', 'traffic', 'from_r', 'from_s', 'from_t', 'to_r', 'to_s', 'to_t'),
