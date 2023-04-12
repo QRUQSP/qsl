@@ -20,7 +20,9 @@ function qruqsp_qsl_hooks_uiSettings(&$ciniki, $tnid, $args) {
     // Check permissions for what menu items should be available
     //
     if( isset($ciniki['tenant']['modules']['qruqsp.qsl'])
-        && (isset($ciniki['tenant']['permissions']['operators'])
+        && (isset($args['permissions']['owners'])
+            || isset($args['permissions']['employees'])
+            || isset($args['permissions']['resellers'])
             || ($ciniki['session']['user']['perms']&0x01) == 0x01
             )
         ) {
