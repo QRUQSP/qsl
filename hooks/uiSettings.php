@@ -28,7 +28,7 @@ function qruqsp_qsl_hooks_uiSettings(&$ciniki, $tnid, $args) {
         ) {
         $menu_item = array(
             'priority'=>5000,
-            'label'=>'qsl',
+            'label'=>'QSL',
             'edit'=>array('app'=>'qruqsp.qsl.main'),
             );
         $rsp['menu_items'][] = $menu_item;
